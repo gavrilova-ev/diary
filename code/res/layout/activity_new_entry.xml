@@ -32,6 +32,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/dateTextView"
+        android:calendarViewShown="false"
         android:layout_marginTop="@dimen/form_small_padding" />
 
     <EditText
@@ -41,14 +42,15 @@
         android:layout_alignParentRight="true"
         android:layout_below="@+id/eventTextView"
         android:ems="10"
-        android:inputType="text|textAutoCorrect|textAutoComplete" />
+        android:inputType="text|textAutoCorrect" />
 
     <Button
         android:id="@+id/saveButton"
         android:layout_width="100dp"
         android:layout_height="wrap_content"
         android:layout_alignRight="@+id/eventEditText"
-        android:layout_centerVertical="true"
+        android:layout_below="@+id/eventEditText"
+        android:layout_marginTop="@dimen/form_large_padding"
         android:onClick="@string/action_save"
         android:text="@string/button_save" />
 

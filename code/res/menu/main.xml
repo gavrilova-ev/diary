@@ -9,5 +9,6 @@
         android:id="@+id/action_add"
         android:title="@string/action_add">
     </item>
+    <item android:id="@+id/action_remove_all" android:title="@string/remove_all"></item>
 
 </menu>

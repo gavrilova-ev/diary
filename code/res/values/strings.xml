@@ -11,5 +11,6 @@
     <string name="label_event">Event</string>
     <string name="button_save">Save</string>
     <string name="action_save">onClickSave</string>
+    <string name="remove_all">Remove all entries</string>
 
 </resources>

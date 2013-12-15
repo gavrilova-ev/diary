@@ -2,8 +2,10 @@ package org.github.gavrilovaev.diary;
 
 import org.github.gavrilovaev.diary.db.DiarySQLiteOpenHelper;
 
+import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -19,7 +21,7 @@ import android.widget.TextView;
 public class MainActivity extends ListActivity {
 
 	private SQLiteDatabase db;
-	
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -48,7 +50,7 @@ public class MainActivity extends ListActivity {
 			db.close();
 		}
 	}
-	
+
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
@@ -65,7 +67,7 @@ public class MainActivity extends ListActivity {
 		oldCursor.close();
 		getListView().invalidate();
 	}
-	
+
 	@Override
 	protected void onStop() {
 		super.onStop();
@@ -79,9 +81,33 @@ public class MainActivity extends ListActivity {
 			Intent intent = new Intent(this, NewEntryActivity.class);
 			startActivity(intent);
 			return true;
+		case R.id.action_remove_all:
+			DialogInterface.OnClickListener onClickListener = new DialogInterface.OnClickListener() {
+
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					if (which == DialogInterface.BUTTON_POSITIVE) {
+						MainActivity.this.removeAllEntries();
+					}
+
+				}
+			};
+			new AlertDialog.Builder(this).setMessage("Are you sure?")
+					.setPositiveButton("Yes", onClickListener)
+					.setNegativeButton("No", onClickListener).show();
 		}
 		return false;
 
+	}
+
+	protected void removeAllEntries() {
+		ensureDatabaseOpen();
+		db.execSQL("DELETE FROM events");
+		DiaryCursorAdapter adapter = (DiaryCursorAdapter) getListAdapter();
+		Cursor oldCursor = adapter.getCursor();
+		adapter.changeCursor(getFreshCursor());
+		oldCursor.close();
+		getListView().invalidate();
 	}
 
 	private static class DiaryCursorAdapter extends CursorAdapter {
