@@ -8,7 +8,6 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -19,24 +18,37 @@ import android.widget.TextView;
 
 public class MainActivity extends ListActivity {
 
+	private SQLiteDatabase db;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
 		setContentView(R.layout.activity_main);
-		Log.i("diary", "layout inflated");
-		DiarySQLiteOpenHelper sqliteHelper = new DiarySQLiteOpenHelper(this);
-		Log.i("diary", "sql helper created");
-		SQLiteDatabase db = sqliteHelper.getWritableDatabase();
-		Log.i("diary", "readable db is created");
-		Cursor cursor = db.query(false, "events", new String[] { "date",
-				"description", "_id" }, null, null, null, null, "date desc", null);
-
-		Log.i("diary", "select querz is executed");
-		
-		setListAdapter(new DiaryCursorAdapter(this, cursor));
+		setListAdapter(new DiaryCursorAdapter(this, getFreshCursor()));
 	}
 
+	private Cursor getFreshCursor() {
+		ensureDatabaseOpen();
+		Cursor cursor = db.query(false, "events", new String[] { "date",
+				"description", "_id" }, null, null, null, null, "date desc",
+				null);
+		return cursor;
+	}
+
+	private void ensureDatabaseOpen() {
+		if (db == null || !db.isOpen()) {
+			DiarySQLiteOpenHelper helper = new DiarySQLiteOpenHelper(this);
+			db = helper.getWritableDatabase();
+		}
+	}
+
+	private void ensureDatabaseClosed() {
+		if (db != null && db.isOpen()) {
+			db.close();
+		}
+	}
+	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
@@ -45,21 +57,37 @@ public class MainActivity extends ListActivity {
 	}
 
 	@Override
+	protected void onRestart() {
+		super.onRestart();
+		DiaryCursorAdapter adapter = (DiaryCursorAdapter) getListAdapter();
+		Cursor oldCursor = adapter.getCursor();
+		adapter.changeCursor(getFreshCursor());
+		oldCursor.close();
+		getListView().invalidate();
+	}
+	
+	@Override
+	protected void onStop() {
+		super.onStop();
+		ensureDatabaseClosed();
+	}
+
+	@Override
 	public boolean onMenuItemSelected(int featureId, MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.action_add:
-			Intent intent = new Intent(this, null);
+			Intent intent = new Intent(this, NewEntryActivity.class);
 			startActivity(intent);
 			return true;
 		}
 		return false;
+
 	}
-	
+
 	private static class DiaryCursorAdapter extends CursorAdapter {
 
 		public DiaryCursorAdapter(Context context, Cursor c) {
-			super(context, c, false);
-
+			super(context, c, true);
 		}
 
 		@Override
