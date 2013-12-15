@@ -12,5 +12,14 @@
     <string name="button_save">Save</string>
     <string name="action_save">onClickSave</string>
     <string name="remove_all">Remove all entries</string>
+    <string-array name="days_of_week">
+        <item>Sunday</item>
+        <item>Monday</item>
+        <item>Tuesday</item>
+        <item>Wednesday</item>
+        <item>Thursday</item>
+        <item>Friday</item>
+        <item>Saturday</item>
+    </string-array>
 
 </resources>

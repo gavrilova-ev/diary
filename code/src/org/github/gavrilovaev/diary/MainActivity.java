@@ -1,5 +1,7 @@
 package org.github.gavrilovaev.diary;
 
+import java.util.Calendar;
+
 import org.github.gavrilovaev.diary.db.DiarySQLiteOpenHelper;
 
 import android.app.AlertDialog;
@@ -110,7 +112,7 @@ public class MainActivity extends ListActivity {
 		getListView().invalidate();
 	}
 
-	private static class DiaryCursorAdapter extends CursorAdapter {
+	private class DiaryCursorAdapter extends CursorAdapter {
 
 		public DiaryCursorAdapter(Context context, Cursor c) {
 			super(context, c, true);
@@ -127,7 +129,22 @@ public class MainActivity extends ListActivity {
 		@Override
 		public void bindView(View view, Context context, Cursor cursor) {
 			TextView text1 = (TextView) view.findViewById(R.id.text1);
-			text1.setText(String.valueOf(cursor.getInt(0)));
+			int date = cursor.getInt(0);
+			int day = date % 100;
+			date /= 100;
+			int month = date % 100;
+			date /= 100;
+			int year = date;
+
+			Calendar calendar = Calendar.getInstance();
+			calendar.set(Calendar.DATE, day);
+			calendar.set(Calendar.MONTH, month);
+			calendar.set(Calendar.YEAR, year);
+			int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
+			String[] daysOfWeek = getResources().getStringArray(
+					R.array.days_of_week);
+			text1.setText(String.format("%s, %04d-%02d-%02d",
+					daysOfWeek[dayOfWeek - 1], year, month, day));
 			TextView text2 = (TextView) view.findViewById(R.id.text2);
 			text2.setText(cursor.getString(1));
 
