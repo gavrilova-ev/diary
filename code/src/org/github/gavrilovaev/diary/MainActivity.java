@@ -6,6 +6,7 @@ import org.github.gavrilovaev.diary.db.DiarySQLiteOpenHelper;
 
 import android.app.AlertDialog;
 import android.app.ListActivity;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -18,6 +19,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CursorAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 public class MainActivity extends ListActivity {
@@ -35,8 +37,8 @@ public class MainActivity extends ListActivity {
 	private Cursor getFreshCursor() {
 		ensureDatabaseOpen();
 		Cursor cursor = db.query(false, "events", new String[] { "date",
-				"description", "_id" }, null, null, null, null, "date desc",
-				null);
+				"description", "fav_type", "_id" }, null, null, null, null,
+				"date desc", null);
 		return cursor;
 	}
 
@@ -63,11 +65,15 @@ public class MainActivity extends ListActivity {
 	@Override
 	protected void onRestart() {
 		super.onRestart();
+		refreshCursor();
+		getListView().invalidate();
+	}
+
+	private void refreshCursor() {
 		DiaryCursorAdapter adapter = (DiaryCursorAdapter) getListAdapter();
 		Cursor oldCursor = adapter.getCursor();
 		adapter.changeCursor(getFreshCursor());
 		oldCursor.close();
-		getListView().invalidate();
 	}
 
 	@Override
@@ -105,11 +111,30 @@ public class MainActivity extends ListActivity {
 	protected void removeAllEntries() {
 		ensureDatabaseOpen();
 		db.execSQL("DELETE FROM events");
-		DiaryCursorAdapter adapter = (DiaryCursorAdapter) getListAdapter();
-		Cursor oldCursor = adapter.getCursor();
-		adapter.changeCursor(getFreshCursor());
-		oldCursor.close();
+		refreshCursor();
 		getListView().invalidate();
+	}
+
+	public void onClickFavorite(View view) {
+		int position = getListView().getPositionForView(view);
+		long id = getListAdapter().getItemId(position);
+		int curFavType = (Integer) view.getTag();
+		int newFavType = curFavType == 0 ? 1 : 0;
+		ensureDatabaseOpen();
+		ContentValues values = new ContentValues(1);
+		values.put("fav_type", newFavType);
+		int affectedRows = db.update("events", values, "_id = " + id, null);
+		if (affectedRows >= 1) {
+			setFavImage((ImageView) view, newFavType);
+			refreshCursor();
+		}
+
+	}
+
+	private void setFavImage(ImageView favoriteImage, int favType) {
+		favoriteImage.setImageResource(favType > 0 ? R.drawable.star_on
+				: R.drawable.star_off);
+		favoriteImage.setTag(Integer.valueOf(favType));
 	}
 
 	private class DiaryCursorAdapter extends CursorAdapter {
@@ -121,14 +146,14 @@ public class MainActivity extends ListActivity {
 		@Override
 		public View newView(Context context, Cursor cursor, ViewGroup parent) {
 			LayoutInflater inflater = LayoutInflater.from(context);
-			View view = inflater.inflate(R.layout.main_activity_row, null);
+			View view = inflater.inflate(R.layout.activity_main_row, null);
 			bindView(view, context, cursor);
 			return view;
 		}
 
 		@Override
 		public void bindView(View view, Context context, Cursor cursor) {
-			TextView text1 = (TextView) view.findViewById(R.id.text1);
+			TextView text1 = (TextView) view.findViewById(R.id.date_text);
 			int date = cursor.getInt(0);
 			int day = date % 100;
 			date /= 100;
@@ -145,9 +170,14 @@ public class MainActivity extends ListActivity {
 					R.array.days_of_week);
 			text1.setText(String.format("%s, %04d-%02d-%02d",
 					daysOfWeek[dayOfWeek - 1], year, month, day));
-			TextView text2 = (TextView) view.findViewById(R.id.text2);
+			TextView text2 = (TextView) view
+					.findViewById(R.id.description_text);
 			text2.setText(cursor.getString(1));
 
+			ImageView favoriteImage = (ImageView) view
+					.findViewById(R.id.favorite_image);
+			int favType = cursor.getInt(2);
+			setFavImage(favoriteImage, favType);
 		}
 
 	}

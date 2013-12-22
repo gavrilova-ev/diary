@@ -21,5 +21,7 @@
         <item>Friday</item>
         <item>Saturday</item>
     </string-array>
+        <string name="favorite_icon">Favorite Icon</string>
+        <string name="action_click_favorite">onClickFavorite</string>
 
 </resources>
