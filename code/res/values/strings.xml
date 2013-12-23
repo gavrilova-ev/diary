@@ -23,5 +23,9 @@
     </string-array>
         <string name="favorite_icon">Favorite Icon</string>
         <string name="action_click_favorite">onClickFavorite</string>
+        <string name="action_week_view">Week view</string>
+        <string name="action_month_view">Month view</string>
+        <string name="action_year_view">Year view</string>
+        <string name="action_all_times_view">All times view</string>
 
 </resources>

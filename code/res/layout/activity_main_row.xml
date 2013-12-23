@@ -34,6 +34,6 @@
         android:layout_alignParentRight="true"
         android:layout_height="40dp"
         android:onClick="@string/action_click_favorite"
-        android:src="@drawable/star_off" />
+        android:src="@drawable/star_none" />
 
 </RelativeLayout>

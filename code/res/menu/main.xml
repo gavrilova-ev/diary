@@ -10,5 +10,9 @@
         android:title="@string/action_add">
     </item>
     <item android:id="@+id/action_remove_all" android:title="@string/remove_all"></item>
+    <item android:id="@+id/action_week_view" android:title="@string/action_week_view"></item>
+    <item android:id="@+id/action_month_view" android:title="@string/action_month_view"></item>
+    <item android:id="@+id/action_year_view" android:title="@string/action_year_view"></item>
+    <item android:id="@+id/action_all_times_view" android:title="@string/action_all_times_view"></item>
 
 </menu>

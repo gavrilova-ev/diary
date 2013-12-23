@@ -21,14 +21,25 @@ import android.view.ViewGroup;
 import android.widget.CursorAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class MainActivity extends ListActivity {
 
+	public static final String MIN_FAVORITE_TYPE = "minFavoriteType";
+	public static final int[] FAVORITE_ICON_IDS = { R.drawable.star_none_2,
+			R.drawable.star_bronze_2, R.drawable.star_silver_2,
+			R.drawable.star_gold_2 };
 	private SQLiteDatabase db;
+	private int minFavoriteType = 0;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
+		Bundle extras = getIntent().getExtras();
+		if (extras != null && extras.containsKey(MIN_FAVORITE_TYPE)) {
+			minFavoriteType = extras.getInt(MIN_FAVORITE_TYPE);
+		}
 
 		setContentView(R.layout.activity_main);
 		setListAdapter(new DiaryCursorAdapter(this, getFreshCursor()));
@@ -37,7 +48,8 @@ public class MainActivity extends ListActivity {
 	private Cursor getFreshCursor() {
 		ensureDatabaseOpen();
 		Cursor cursor = db.query(false, "events", new String[] { "date",
-				"description", "fav_type", "_id" }, null, null, null, null,
+				"description", "fav_type", "_id" }, "fav_type >= ?",
+				new String[] { String.valueOf(minFavoriteType) }, null, null,
 				"date desc", null);
 		return cursor;
 	}
@@ -103,9 +115,29 @@ public class MainActivity extends ListActivity {
 			new AlertDialog.Builder(this).setMessage("Are you sure?")
 					.setPositiveButton("Yes", onClickListener)
 					.setNegativeButton("No", onClickListener).show();
+			return true;
+		case R.id.action_week_view:
+			changeMinFavoriteType(0);
+			return true;
+		case R.id.action_month_view:
+			changeMinFavoriteType(1);
+			return true;
+		case R.id.action_year_view:
+			changeMinFavoriteType(2);
+			return true;
+		case R.id.action_all_times_view:
+			changeMinFavoriteType(3);
+			return true;
 		}
 		return false;
 
+	}
+
+	private void changeMinFavoriteType(int newMinFavoriteType) {
+		Intent intent = new Intent(this, getClass());
+		intent.putExtra(MIN_FAVORITE_TYPE, newMinFavoriteType);
+		startActivity(intent);
+		finish();
 	}
 
 	protected void removeAllEntries() {
@@ -116,10 +148,23 @@ public class MainActivity extends ListActivity {
 	}
 
 	public void onClickFavorite(View view) {
+		if (minFavoriteType > 2) {
+			return;
+		}
+
 		int position = getListView().getPositionForView(view);
 		long id = getListAdapter().getItemId(position);
 		int curFavType = (Integer) view.getTag();
-		int newFavType = curFavType == 0 ? 1 : 0;
+		int newFavType;
+		if (curFavType == minFavoriteType) {
+			newFavType = minFavoriteType + 1;
+		} else if (curFavType == minFavoriteType + 1) {
+			newFavType = minFavoriteType;
+		} else {
+			Toast.makeText(this, "This favorite type is too great to modify.",
+					Toast.LENGTH_SHORT).show();
+			return;
+		}
 		ensureDatabaseOpen();
 		ContentValues values = new ContentValues(1);
 		values.put("fav_type", newFavType);
@@ -132,8 +177,7 @@ public class MainActivity extends ListActivity {
 	}
 
 	private void setFavImage(ImageView favoriteImage, int favType) {
-		favoriteImage.setImageResource(favType > 0 ? R.drawable.star_on
-				: R.drawable.star_off);
+		favoriteImage.setImageResource(FAVORITE_ICON_IDS[favType]);
 		favoriteImage.setTag(Integer.valueOf(favType));
 	}
 
