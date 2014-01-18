@@ -199,9 +199,9 @@ public class MainActivity extends ListActivity {
 		public void bindView(View view, Context context, Cursor cursor) {
 			TextView text1 = (TextView) view.findViewById(R.id.date_text);
 			int date = cursor.getInt(0);
-			int day = date % 100;
+			int day = date % 100; 
 			date /= 100;
-			int month = date % 100;
+			int month = date % 100 + 1;
 			date /= 100;
 			int year = date;
 
