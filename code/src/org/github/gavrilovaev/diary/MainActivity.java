@@ -27,7 +27,7 @@ public class MainActivity extends ListActivity {
 
 	public static final String MIN_FAVORITE_TYPE = "minFavoriteType";
 	public static final int[] FAVORITE_ICON_IDS = { R.drawable.star_none_2,
-			R.drawable.star_bronze_2, R.drawable.star_silver_2,
+			R.drawable.star_bronze_2, R.drawable.star_silver_3,
 			R.drawable.star_gold_2 };
 	private SQLiteDatabase db;
 	private int minFavoriteType = 0;
