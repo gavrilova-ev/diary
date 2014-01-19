@@ -3,12 +3,10 @@ package org.github.gavrilovaev.diary;
 import java.util.Calendar;
 
 import org.github.gavrilovaev.diary.db.DiarySQLiteOpenHelper;
+import org.github.gavrilovaev.diary.util.ActionBarListActivity;
 
-import android.app.AlertDialog;
-import android.app.ListActivity;
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -23,7 +21,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class MainActivity extends ListActivity {
+public class MainActivity extends ActionBarListActivity 
+{
 
 	public static final String MIN_FAVORITE_TYPE = "minFavoriteType";
 	public static final int[] FAVORITE_ICON_IDS = { R.drawable.star_none_2,
@@ -43,6 +42,11 @@ public class MainActivity extends ListActivity {
 
 		setContentView(R.layout.activity_main);
 		setListAdapter(new DiaryCursorAdapter(this, getFreshCursor()));
+		
+		Cursor cursor = db.rawQuery("select count(*) from events", null);
+		cursor.moveToFirst();
+		int int1 = cursor.getInt(0);
+		Toast.makeText(this, "oha "+int1, Toast.LENGTH_SHORT).show();
 	}
 
 	private Cursor getFreshCursor() {
@@ -70,8 +74,8 @@ public class MainActivity extends ListActivity {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.main, menu);
-		return true;
+		getMenuInflater().inflate(R.menu.activity_main_actions, menu);
+		return super.onCreateOptionsMenu(menu);
 	}
 
 	@Override
@@ -94,28 +98,30 @@ public class MainActivity extends ListActivity {
 		ensureDatabaseClosed();
 	}
 
+	
+	// TODO: Get this method running again
 	@Override
-	public boolean onMenuItemSelected(int featureId, MenuItem item) {
+	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.action_add:
 			Intent intent = new Intent(this, NewEntryActivity.class);
 			startActivity(intent);
 			return true;
-		case R.id.action_remove_all:
-			DialogInterface.OnClickListener onClickListener = new DialogInterface.OnClickListener() {
-
-				@Override
-				public void onClick(DialogInterface dialog, int which) {
-					if (which == DialogInterface.BUTTON_POSITIVE) {
-						MainActivity.this.removeAllEntries();
-					}
-
-				}
-			};
-			new AlertDialog.Builder(this).setMessage("Are you sure?")
-					.setPositiveButton("Yes", onClickListener)
-					.setNegativeButton("No", onClickListener).show();
-			return true;
+//		case R.id.action_remove_all:
+//			DialogInterface.OnClickListener onClickListener = new DialogInterface.OnClickListener() {
+//
+//				@Override
+//				public void onClick(DialogInterface dialog, int which) {
+//					if (which == DialogInterface.BUTTON_POSITIVE) {
+//						MainActivity.this.removeAllEntries();
+//					}
+//
+//				}
+//			};
+//			new AlertDialog.Builder(this).setMessage("Are you sure?")
+//					.setPositiveButton("Yes", onClickListener)
+//					.setNegativeButton("No", onClickListener).show();
+//			return true;
 		case R.id.action_week_view:
 			changeMinFavoriteType(0);
 			return true;
@@ -201,7 +207,7 @@ public class MainActivity extends ListActivity {
 			int date = cursor.getInt(0);
 			int day = date % 100; 
 			date /= 100;
-			int month = date % 100 + 1;
+			int month = date % 100;
 			date /= 100;
 			int year = date;
 
@@ -213,7 +219,7 @@ public class MainActivity extends ListActivity {
 			String[] daysOfWeek = getResources().getStringArray(
 					R.array.days_of_week);
 			text1.setText(String.format("%s, %04d-%02d-%02d",
-					daysOfWeek[dayOfWeek - 1], year, month, day));
+					daysOfWeek[dayOfWeek - 1], year, month + 1, day));
 			TextView text2 = (TextView) view
 					.findViewById(R.id.description_text);
 			text2.setText(cursor.getString(1));

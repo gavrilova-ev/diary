@@ -2,16 +2,17 @@ package org.github.gavrilovaev.diary;
 
 import org.github.gavrilovaev.diary.db.DiarySQLiteOpenHelper;
 
-import android.app.Activity;
 import android.content.ContentValues;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.DatePicker;
 import android.widget.EditText;
 
-public class NewEntryActivity extends Activity {
+public class NewEntryActivity extends ActionBarActivity {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -21,12 +22,15 @@ public class NewEntryActivity extends Activity {
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.new_entry, menu);
-		return true;
+		getMenuInflater().inflate(R.menu.activity_new_entry_actions, menu);
+		return super.onCreateOptionsMenu(menu);
 	}
 
 	public void onClickSave(View view) {
+		save();
+	}
+
+	private void save() {
 		DatePicker datePicker = (DatePicker) getWindow().findViewById(
 				R.id.eventDatePicker);
 		int dayOfMonth = datePicker.getDayOfMonth();
@@ -45,5 +49,17 @@ public class NewEntryActivity extends Activity {
 		db.insert("events", null, values);
 		
 		finish();
+	}
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case R.id.action_done:
+			save();
+			return true;
+
+		default:
+			return super.onOptionsItemSelected(item);
+		}
 	}
 }

@@ -1,57 +1,64 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context=".NewEntryActivity" >
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="?attr/actionBarSize" >
 
-    <TextView
-        android:id="@+id/dateTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true"
-        android:text="@string/label_date"
-        android:textAppearance="?android:attr/textAppearanceLarge" />
+    <RelativeLayout
 
-    <TextView
-        android:id="@+id/eventTextView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@+id/eventDatePicker"
-        android:text="@string/label_event"
-        android:layout_marginTop="@dimen/form_large_padding"
-        android:textAppearance="?android:attr/textAppearanceLarge" />
+        android:paddingBottom="@dimen/activity_vertical_margin"
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:paddingTop="@dimen/activity_vertical_margin"
+        tools:context=".NewEntryActivity" >
 
-    <DatePicker
-        android:id="@+id/eventDatePicker"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/dateTextView"
-        android:calendarViewShown="false"
-        android:layout_marginTop="@dimen/form_small_padding" />
+        <TextView
+            android:id="@+id/dateTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:text="@string/label_date"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
 
-    <EditText
-        android:id="@+id/eventEditText"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_below="@+id/eventTextView"
-        android:ems="10"
-        android:inputType="text|textAutoCorrect" />
+        <TextView
+            android:id="@+id/eventTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@+id/eventDatePicker"
+            android:layout_marginTop="@dimen/form_large_padding"
+            android:text="@string/label_event"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
 
-    <Button
-        android:id="@+id/saveButton"
-        android:layout_width="100dp"
-        android:layout_height="wrap_content"
-        android:layout_alignRight="@+id/eventEditText"
-        android:layout_below="@+id/eventEditText"
-        android:layout_marginTop="@dimen/form_large_padding"
-        android:onClick="@string/action_save"
-        android:text="@string/button_save" />
+        <DatePicker
+            android:id="@+id/eventDatePicker"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/dateTextView"
+            android:layout_marginTop="@dimen/form_small_padding"
+            android:calendarViewShown="false" />
 
-</RelativeLayout>
+        <EditText
+            android:id="@+id/eventEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_below="@+id/eventTextView"
+            android:ems="10"
+            android:inputType="text|textAutoCorrect" />
+
+        <Button
+            android:id="@+id/saveButton"
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:layout_alignRight="@+id/eventEditText"
+            android:layout_below="@+id/eventEditText"
+            android:layout_marginTop="@dimen/form_large_padding"
+            android:onClick="@string/action_save"
+            android:text="@string/button_save" />
+    </RelativeLayout>
+
+</ScrollView>
