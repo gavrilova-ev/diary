@@ -3,12 +3,13 @@ package org.github.gavrilovaev.diary;
 import org.github.gavrilovaev.diary.db.DiarySQLiteOpenHelper;
 
 import android.content.ContentValues;
+import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.DatePicker;
 import android.widget.EditText;
 
@@ -18,16 +19,21 @@ public class NewEntryActivity extends ActionBarActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_new_entry);
+		
+		ActionBar actionBar = getSupportActionBar();
+		actionBar.setDisplayHomeAsUpEnabled(true);
 	}
 
+	@Override
+	public Intent getSupportParentActivityIntent() {
+		Intent parentActivityIntent = new Intent(this, MainActivity.class);
+		return parentActivityIntent;
+	}
+	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.activity_new_entry_actions, menu);
 		return super.onCreateOptionsMenu(menu);
-	}
-
-	public void onClickSave(View view) {
-		save();
 	}
 
 	private void save() {

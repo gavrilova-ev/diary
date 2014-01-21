@@ -6,7 +6,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 public class DiarySQLiteOpenHelper extends SQLiteOpenHelper {
 
-	private static final String DB_NAME = "diarydb";
+	public static final String DB_NAME = "diarydb";
 	private static final int DB_VERSION = 1;
 
 	public DiarySQLiteOpenHelper(Context context) {

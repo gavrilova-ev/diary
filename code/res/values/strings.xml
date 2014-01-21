@@ -28,5 +28,6 @@
         <string name="action_year_view">Year view</string>
         <string name="action_all_times_view">All times view</string>
         <string name="action_done">Done</string>
+        <string name="action_backup">Backup data to SD</string>
 
 </resources>

@@ -1,7 +1,9 @@
 package org.github.gavrilovaev.diary;
 
+import java.lang.reflect.Field;
 import java.util.Calendar;
 
+import org.github.gavrilovaev.diary.db.BackupUtil;
 import org.github.gavrilovaev.diary.db.DiarySQLiteOpenHelper;
 import org.github.gavrilovaev.diary.util.ActionBarListActivity;
 
@@ -15,14 +17,14 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.widget.CursorAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class MainActivity extends ActionBarListActivity 
-{
+public class MainActivity extends ActionBarListActivity {
 
 	public static final String MIN_FAVORITE_TYPE = "minFavoriteType";
 	public static final int[] FAVORITE_ICON_IDS = { R.drawable.star_none_2,
@@ -42,11 +44,6 @@ public class MainActivity extends ActionBarListActivity
 
 		setContentView(R.layout.activity_main);
 		setListAdapter(new DiaryCursorAdapter(this, getFreshCursor()));
-		
-		Cursor cursor = db.rawQuery("select count(*) from events", null);
-		cursor.moveToFirst();
-		int int1 = cursor.getInt(0);
-		Toast.makeText(this, "oha "+int1, Toast.LENGTH_SHORT).show();
 	}
 
 	private Cursor getFreshCursor() {
@@ -98,7 +95,6 @@ public class MainActivity extends ActionBarListActivity
 		ensureDatabaseClosed();
 	}
 
-	
 	// TODO: Get this method running again
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
@@ -107,21 +103,25 @@ public class MainActivity extends ActionBarListActivity
 			Intent intent = new Intent(this, NewEntryActivity.class);
 			startActivity(intent);
 			return true;
-//		case R.id.action_remove_all:
-//			DialogInterface.OnClickListener onClickListener = new DialogInterface.OnClickListener() {
-//
-//				@Override
-//				public void onClick(DialogInterface dialog, int which) {
-//					if (which == DialogInterface.BUTTON_POSITIVE) {
-//						MainActivity.this.removeAllEntries();
-//					}
-//
-//				}
-//			};
-//			new AlertDialog.Builder(this).setMessage("Are you sure?")
-//					.setPositiveButton("Yes", onClickListener)
-//					.setNegativeButton("No", onClickListener).show();
-//			return true;
+		case R.id.action_backup:
+			BackupUtil.backupDataToSD(this);
+			return true;
+			// case R.id.action_remove_all:
+			// DialogInterface.OnClickListener onClickListener = new
+			// DialogInterface.OnClickListener() {
+			//
+			// @Override
+			// public void onClick(DialogInterface dialog, int which) {
+			// if (which == DialogInterface.BUTTON_POSITIVE) {
+			// MainActivity.this.removeAllEntries();
+			// }
+			//
+			// }
+			// };
+			// new AlertDialog.Builder(this).setMessage("Are you sure?")
+			// .setPositiveButton("Yes", onClickListener)
+			// .setNegativeButton("No", onClickListener).show();
+			// return true;
 		case R.id.action_week_view:
 			changeMinFavoriteType(0);
 			return true;
@@ -205,7 +205,7 @@ public class MainActivity extends ActionBarListActivity
 		public void bindView(View view, Context context, Cursor cursor) {
 			TextView text1 = (TextView) view.findViewById(R.id.date_text);
 			int date = cursor.getInt(0);
-			int day = date % 100; 
+			int day = date % 100;
 			date /= 100;
 			int month = date % 100;
 			date /= 100;
