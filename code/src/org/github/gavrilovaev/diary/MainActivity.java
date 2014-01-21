@@ -1,26 +1,32 @@
 package org.github.gavrilovaev.diary;
 
-import java.lang.reflect.Field;
 import java.util.Calendar;
 
 import org.github.gavrilovaev.diary.db.BackupUtil;
 import org.github.gavrilovaev.diary.db.DiarySQLiteOpenHelper;
 import org.github.gavrilovaev.diary.util.ActionBarListActivity;
 
+import android.app.AlertDialog;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.support.v4.app.ActionBarDrawerToggle;
+import android.support.v4.widget.DrawerLayout;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewConfiguration;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.CursorAdapter;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -32,6 +38,7 @@ public class MainActivity extends ActionBarListActivity {
 			R.drawable.star_gold_2 };
 	private SQLiteDatabase db;
 	private int minFavoriteType = 0;
+	private ActionBarDrawerToggle drawerToggle;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -43,7 +50,49 @@ public class MainActivity extends ActionBarListActivity {
 		}
 
 		setContentView(R.layout.activity_main);
+
+		String[] navigationLevels = { "Days", "Weeks", "Months", "Years" };
+		ListView drawerList = (ListView) findViewById(R.id.left_drawer);
+		drawerList.setAdapter(new ArrayAdapter<String>(this,
+				R.layout.drawer_row, R.id.item_text, navigationLevels));
+		DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+		final CharSequence title = getTitle();
+		drawerToggle = new ActionBarDrawerToggle(this, drawerLayout,
+				R.drawable.ic_drawer, 0, 0) {
+
+			/** Called when a drawer has settled in a completely closed state. */
+			public void onDrawerClosed(View view) {
+				super.onDrawerClosed(view);
+				getSupportActionBar().setTitle(title);
+			}
+
+			/** Called when a drawer has settled in a completely open state. */
+			public void onDrawerOpened(View drawerView) {
+				super.onDrawerOpened(drawerView);
+				getSupportActionBar().setTitle("Navigation");
+			}
+		};
+
+		// Set the drawer toggle as the DrawerListener
+		drawerLayout.setDrawerListener(drawerToggle);
+		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+		getSupportActionBar().setHomeButtonEnabled(true);
+
+		// Set the list's click listener
+		drawerList.setOnItemClickListener(new DrawerItemClickListener());
 		setListAdapter(new DiaryCursorAdapter(this, getFreshCursor()));
+	}
+
+	@Override
+	protected void onPostCreate(Bundle savedInstanceState) {
+		super.onPostCreate(savedInstanceState);
+		drawerToggle.syncState();
+	}
+
+	@Override
+	public void onConfigurationChanged(Configuration newConfig) {
+		super.onConfigurationChanged(newConfig);
+		drawerToggle.onConfigurationChanged(newConfig);
 	}
 
 	private Cursor getFreshCursor() {
@@ -95,9 +144,12 @@ public class MainActivity extends ActionBarListActivity {
 		ensureDatabaseClosed();
 	}
 
-	// TODO: Get this method running again
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
+		if (drawerToggle.onOptionsItemSelected(item)) {
+			return true;
+		}
+
 		switch (item.getItemId()) {
 		case R.id.action_add:
 			Intent intent = new Intent(this, NewEntryActivity.class);
@@ -106,22 +158,8 @@ public class MainActivity extends ActionBarListActivity {
 		case R.id.action_backup:
 			BackupUtil.backupDataToSD(this);
 			return true;
-			// case R.id.action_remove_all:
-			// DialogInterface.OnClickListener onClickListener = new
-			// DialogInterface.OnClickListener() {
-			//
-			// @Override
-			// public void onClick(DialogInterface dialog, int which) {
-			// if (which == DialogInterface.BUTTON_POSITIVE) {
-			// MainActivity.this.removeAllEntries();
-			// }
-			//
-			// }
-			// };
-			// new AlertDialog.Builder(this).setMessage("Are you sure?")
-			// .setPositiveButton("Yes", onClickListener)
-			// .setNegativeButton("No", onClickListener).show();
-			// return true;
+		case R.id.action_remove_all:
+			return removeAll();
 		case R.id.action_week_view:
 			changeMinFavoriteType(0);
 			return true;
@@ -137,6 +175,23 @@ public class MainActivity extends ActionBarListActivity {
 		}
 		return false;
 
+	}
+
+	private boolean removeAll() {
+		DialogInterface.OnClickListener onClickListener = new DialogInterface.OnClickListener() {
+
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				if (which == DialogInterface.BUTTON_POSITIVE) {
+					MainActivity.this.removeAllEntries();
+				}
+
+			}
+		};
+		new AlertDialog.Builder(this).setMessage("Are you sure?")
+				.setPositiveButton("Yes", onClickListener)
+				.setNegativeButton("No", onClickListener).show();
+		return true;
 	}
 
 	private void changeMinFavoriteType(int newMinFavoriteType) {
@@ -230,6 +285,15 @@ public class MainActivity extends ActionBarListActivity {
 			setFavImage(favoriteImage, favType);
 		}
 
+	}
+
+	private class DrawerItemClickListener implements
+			ListView.OnItemClickListener {
+		@Override
+		public void onItemClick(AdapterView parent, View view, int position,
+				long id) {
+			changeMinFavoriteType(position);
+		}
 	}
 
 }
