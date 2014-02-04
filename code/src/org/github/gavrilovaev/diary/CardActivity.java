@@ -30,7 +30,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class MainActivity extends ActionBarListActivity {
+public class CardActivity extends ActionBarListActivity {
 
 	public static final String MIN_FAVORITE_TYPE = "minFavoriteType";
 	public static final int[] FAVORITE_ICON_IDS = { R.drawable.star_none_2,
@@ -49,9 +49,13 @@ public class MainActivity extends ActionBarListActivity {
 			minFavoriteType = extras.getInt(MIN_FAVORITE_TYPE);
 		}
 
-		setContentView(R.layout.activity_main);
+		setContentView(R.layout.activity_card);
+		initializeNavigationDrawer();
+		setListAdapter(new DiaryCursorAdapter(this, getFreshCursor()));
+	}
 
-		String[] navigationLevels = { "Days", "Weeks", "Months", "Years", "Card style" };
+	private void initializeNavigationDrawer() {
+		String[] navigationLevels = { "Days", "Weeks", "Months", "Years" };
 		ListView drawerList = (ListView) findViewById(R.id.left_drawer);
 		drawerList.setAdapter(new ArrayAdapter<String>(this,
 				R.layout.drawer_row, R.id.item_text, navigationLevels));
@@ -80,7 +84,6 @@ public class MainActivity extends ActionBarListActivity {
 
 		// Set the list's click listener
 		drawerList.setOnItemClickListener(new DrawerItemClickListener());
-		setListAdapter(new DiaryCursorAdapter(this, getFreshCursor()));
 	}
 
 	@Override
@@ -98,8 +101,9 @@ public class MainActivity extends ActionBarListActivity {
 	private Cursor getFreshCursor() {
 		ensureDatabaseOpen();
 		Cursor cursor = db.query(false, "events", new String[] { "date",
-				"description", "fav_type", "_id" }, "fav_type >= ?",
-				new String[] { String.valueOf(minFavoriteType) }, null, null,
+				"group_concat(description, '#~#~#') AS descriptions",
+				"min(_id) AS _id" }, "fav_type >= ?",
+				new String[] { String.valueOf(minFavoriteType) }, "date", null,
 				"date desc", null);
 		return cursor;
 	}
@@ -183,7 +187,7 @@ public class MainActivity extends ActionBarListActivity {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				if (which == DialogInterface.BUTTON_POSITIVE) {
-					MainActivity.this.removeAllEntries();
+					CardActivity.this.removeAllEntries();
 				}
 
 			}
@@ -251,14 +255,13 @@ public class MainActivity extends ActionBarListActivity {
 		@Override
 		public View newView(Context context, Cursor cursor, ViewGroup parent) {
 			LayoutInflater inflater = LayoutInflater.from(context);
-			View view = inflater.inflate(R.layout.activity_main_row, null);
+			View view = inflater.inflate(R.layout.activity_card_card, null);
 			bindView(view, context, cursor);
 			return view;
 		}
 
 		@Override
 		public void bindView(View view, Context context, Cursor cursor) {
-			TextView text1 = (TextView) view.findViewById(R.id.date_text);
 			int date = cursor.getInt(0);
 			int day = date % 100;
 			date /= 100;
@@ -273,16 +276,26 @@ public class MainActivity extends ActionBarListActivity {
 			int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
 			String[] daysOfWeek = getResources().getStringArray(
 					R.array.days_of_week);
-			text1.setText(String.format("%s, %04d-%02d-%02d",
-					daysOfWeek[dayOfWeek - 1], year, month + 1, day));
-			TextView text2 = (TextView) view
-					.findViewById(R.id.description_text);
-			text2.setText(cursor.getString(1));
 
-			ImageView favoriteImage = (ImageView) view
-					.findViewById(R.id.favorite_image);
-			int favType = cursor.getInt(2);
-			setFavImage(favoriteImage, favType);
+			TextView dateText = (TextView) view.findViewById(R.id.date_text);
+			dateText.setText(String.format("%s, %04d-%02d-%02d",
+					daysOfWeek[dayOfWeek - 1], year, month + 1, day));
+			
+			TextView descriptionsText = (TextView) view
+					.findViewById(R.id.content_text);
+			String descriptionsAggregate = cursor.getString(1);
+			String[] descriptions = descriptionsAggregate.split("#~#~#");
+			String multiLineDescription = "";
+			for (String description : descriptions) {
+				multiLineDescription += "- "+description+"\n";
+			}
+			multiLineDescription = multiLineDescription.substring(0, multiLineDescription.length() - 1);
+			descriptionsText.setText(multiLineDescription);
+
+			// ImageView favoriteImage = (ImageView) view
+			// .findViewById(R.id.favorite_image);
+			// int favType = cursor.getInt(2);
+			// setFavImage(favoriteImage, favType);
 		}
 
 	}
@@ -292,14 +305,7 @@ public class MainActivity extends ActionBarListActivity {
 		@Override
 		public void onItemClick(AdapterView parent, View view, int position,
 				long id) {
-			if (position == 4) {
-				Intent intent = new Intent(MainActivity.this, CardActivity.class);
-				intent.putExtra(MIN_FAVORITE_TYPE, 0);
-				startActivity(intent);
-				finish();
-			} else {
-				changeMinFavoriteType(position);
-			}
+			changeMinFavoriteType(position);
 		}
 	}
 

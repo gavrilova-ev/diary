@@ -12,6 +12,7 @@
     <string name="button_save">Save</string>
     <string name="action_save">onClickSave</string>
     <string name="remove_all">Remove all entries</string>
+
     <string-array name="days_of_week">
         <item>Sunday</item>
         <item>Monday</item>
@@ -21,13 +22,15 @@
         <item>Friday</item>
         <item>Saturday</item>
     </string-array>
-        <string name="favorite_icon">Favorite Icon</string>
-        <string name="action_click_favorite">onClickFavorite</string>
-        <string name="action_week_view">Week view</string>
-        <string name="action_month_view">Month view</string>
-        <string name="action_year_view">Year view</string>
-        <string name="action_all_times_view">All times view</string>
-        <string name="action_done">Done</string>
-        <string name="action_backup">Backup data to SD</string>
+
+    <string name="favorite_icon">Favorite Icon</string>
+    <string name="action_click_favorite">onClickFavorite</string>
+    <string name="action_week_view">Week view</string>
+    <string name="action_month_view">Month view</string>
+    <string name="action_year_view">Year view</string>
+    <string name="action_all_times_view">All times view</string>
+    <string name="action_done">Done</string>
+    <string name="action_backup">Backup data to SD</string>
+    <string name="title_activity_card">Cards</string>
 
 </resources>
