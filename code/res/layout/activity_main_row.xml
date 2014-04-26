@@ -16,7 +16,9 @@
             android:layout_height="wrap_content"
             android:text=""
             android:textStyle="italic"
-            android:textSize="12sp" />
+            android:textSize="12sp"
+            android:paddingLeft="2sp"
+            android:paddingRight="2sp" />
 
         <TextView
             android:id="@+id/description_text"
@@ -24,7 +26,9 @@
             android:layout_height="wrap_content"
             android:text=""
             android:textSize="16sp"
-            android:textStyle="bold" />
+            android:textStyle="bold" 
+            android:paddingLeft="2sp"
+            android:paddingRight="2sp" />
     </LinearLayout>
 
     <ImageView

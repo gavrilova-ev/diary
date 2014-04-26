@@ -11,6 +11,7 @@
         android:layout_height="wrap_content"
         android:text=""
         android:textSize="24sp"
-        android:textStyle="bold" />
+        android:textStyle="bold"
+        android:padding="2sp" />
 
 </RelativeLayout>

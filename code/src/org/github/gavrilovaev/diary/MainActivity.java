@@ -17,11 +17,13 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CursorAdapter;
@@ -51,7 +53,8 @@ public class MainActivity extends ActionBarListActivity {
 
 		setContentView(R.layout.activity_main);
 
-		String[] navigationLevels = { "Days", "Weeks", "Months", "Years", "Card style" };
+		String[] navigationLevels = { "Days", "Weeks", "Months", "Years",
+				"Card style" };
 		ListView drawerList = (ListView) findViewById(R.id.left_drawer);
 		drawerList.setAdapter(new ArrayAdapter<String>(this,
 				R.layout.drawer_row, R.id.item_text, navigationLevels));
@@ -80,7 +83,9 @@ public class MainActivity extends ActionBarListActivity {
 
 		// Set the list's click listener
 		drawerList.setOnItemClickListener(new DrawerItemClickListener());
+
 		setListAdapter(new DiaryCursorAdapter(this, getFreshCursor()));
+		registerForContextMenu(getListView());
 	}
 
 	@Override
@@ -93,6 +98,40 @@ public class MainActivity extends ActionBarListActivity {
 	public void onConfigurationChanged(Configuration newConfig) {
 		super.onConfigurationChanged(newConfig);
 		drawerToggle.onConfigurationChanged(newConfig);
+	}
+
+	@Override
+	public void onCreateContextMenu(ContextMenu menu, View v,
+			ContextMenuInfo menuInfo) {
+		super.onCreateContextMenu(menu, v, menuInfo);
+		if (v.getId() == android.R.id.list) {
+			AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
+			// menu.setHeaderTitle(info.position);
+			String[] menuItems = { "Delete" };
+			for (int i = 0; i < menuItems.length; i++) {
+				menu.add(Menu.NONE, i, i, menuItems[i]);
+			}
+		}
+	}
+
+	@Override
+	public boolean onContextItemSelected(MenuItem item) {
+		if (item.getMenuInfo() instanceof AdapterView.AdapterContextMenuInfo) {
+			AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item
+					.getMenuInfo();
+			int menuItemIndex = item.getItemId();
+			if (menuItemIndex == 0) {
+				int numAffectedRows = db.delete("events", "_id = ?", new String[]{String.valueOf(info.id)});
+				if (numAffectedRows == 1) {
+					Toast.makeText(this, "Entry deleted.", Toast.LENGTH_SHORT).show();
+					refreshCursor();
+				} else {
+					Toast.makeText(this, "Could not delete entry.", Toast.LENGTH_SHORT).show();
+				}
+				return true;
+			}
+		}
+		return super.onContextItemSelected(item);
 	}
 
 	private Cursor getFreshCursor() {
@@ -287,13 +326,26 @@ public class MainActivity extends ActionBarListActivity {
 
 	}
 
+	private class DiaryEntryListener implements
+			AdapterView.OnItemLongClickListener {
+
+		@Override
+		public boolean onItemLongClick(AdapterView<?> parent, View view,
+				int position, long id) {
+			// TODO Auto-generated method stub
+			return false;
+		}
+
+	}
+
 	private class DrawerItemClickListener implements
 			ListView.OnItemClickListener {
 		@Override
 		public void onItemClick(AdapterView parent, View view, int position,
 				long id) {
 			if (position == 4) {
-				Intent intent = new Intent(MainActivity.this, CardActivity.class);
+				Intent intent = new Intent(MainActivity.this,
+						CardActivity.class);
 				intent.putExtra(MIN_FAVORITE_TYPE, 0);
 				startActivity(intent);
 				finish();
