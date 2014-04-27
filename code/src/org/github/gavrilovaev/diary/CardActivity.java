@@ -1,9 +1,11 @@
 package org.github.gavrilovaev.diary;
 
+import java.util.Arrays;
 import java.util.Calendar;
 
 import org.github.gavrilovaev.diary.db.BackupUtil;
 import org.github.gavrilovaev.diary.db.DiarySQLiteOpenHelper;
+import org.github.gavrilovaev.diary.fragments.CardFragment;
 import org.github.gavrilovaev.diary.util.ActionBarListActivity;
 
 import android.app.AlertDialog;
@@ -16,7 +18,12 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBar.OnNavigationListener;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -27,6 +34,7 @@ import android.widget.ArrayAdapter;
 import android.widget.CursorAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -49,9 +57,21 @@ public class CardActivity extends ActionBarListActivity {
 			minFavoriteType = extras.getInt(MIN_FAVORITE_TYPE);
 		}
 
-		setContentView(R.layout.activity_card);
+		setContentView(R.layout.activity_main);
 		initializeNavigationDrawer();
 		setListAdapter(new DiaryCursorAdapter(this, getFreshCursor()));
+
+		// Initialize drop-down navigation
+		OnNavigationListener navigationListener = new NavigationSpinnerListener();
+		ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<String>(this,
+				R.layout.card_activity_dropdown_item, 
+				R.id.card_activity_dropdown_item_text,
+				Arrays.asList("Days", "Weeks", "Months", "Years"));
+//		spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		ActionBar actionBar = getSupportActionBar();
+		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
+		actionBar
+				.setListNavigationCallbacks(spinnerAdapter, navigationListener);
 	}
 
 	private void initializeNavigationDrawer() {
@@ -199,10 +219,16 @@ public class CardActivity extends ActionBarListActivity {
 	}
 
 	private void changeMinFavoriteType(int newMinFavoriteType) {
-		Intent intent = new Intent(this, getClass());
-		intent.putExtra(MIN_FAVORITE_TYPE, newMinFavoriteType);
-		startActivity(intent);
-		finish();
+		FragmentManager fragmentManager = getSupportFragmentManager();
+		FragmentTransaction transaction = fragmentManager.beginTransaction();
+		Fragment newCardFragment = CardFragment.newInstance(newMinFavoriteType);
+//		transaction.detach(fragmentManager.findFragmentById(R.id.content_fragment));
+//		transaction.attach(newEntryListFragment);
+		transaction.replace(R.id.content_fragment, newCardFragment);
+		transaction.setTransitionStyle(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
+//		transaction.addToBackStack(null);
+//		transaction.detach(fragmentManager.findFragmentById(R.id.content_fragment));
+		transaction.commit();
 	}
 
 	protected void removeAllEntries() {
@@ -280,16 +306,17 @@ public class CardActivity extends ActionBarListActivity {
 			TextView dateText = (TextView) view.findViewById(R.id.date_text);
 			dateText.setText(String.format("%s, %04d-%02d-%02d",
 					daysOfWeek[dayOfWeek - 1], year, month + 1, day));
-			
+
 			TextView descriptionsText = (TextView) view
 					.findViewById(R.id.content_text);
 			String descriptionsAggregate = cursor.getString(1);
 			String[] descriptions = descriptionsAggregate.split("#~#~#");
 			String multiLineDescription = "";
 			for (String description : descriptions) {
-				multiLineDescription += "- "+description+"\n";
+				multiLineDescription += "- " + description + "\n";
 			}
-			multiLineDescription = multiLineDescription.substring(0, multiLineDescription.length() - 1);
+			multiLineDescription = multiLineDescription.substring(0,
+					multiLineDescription.length() - 1);
 			descriptionsText.setText(multiLineDescription);
 
 			// ImageView favoriteImage = (ImageView) view
@@ -303,10 +330,22 @@ public class CardActivity extends ActionBarListActivity {
 	private class DrawerItemClickListener implements
 			ListView.OnItemClickListener {
 		@Override
-		public void onItemClick(AdapterView parent, View view, int position,
+		public void onItemClick(AdapterView<?> parent, View view, int position,
 				long id) {
 			changeMinFavoriteType(position);
 		}
+	}
+	
+	private class NavigationSpinnerListener implements ActionBar.OnNavigationListener {
+
+		@Override
+		public boolean onNavigationItemSelected(int itemPosition, long itemId) {
+			if (itemPosition != minFavoriteType) {
+				changeMinFavoriteType(itemPosition);
+			}
+			return true;
+		}
+		
 	}
 
 }

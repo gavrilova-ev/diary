@@ -1,5 +1,6 @@
 package org.github.gavrilovaev.diary;
 
+import org.github.gavrilovaev.diary.R;
 import org.github.gavrilovaev.diary.db.DiarySQLiteOpenHelper;
 
 import android.content.ContentValues;
