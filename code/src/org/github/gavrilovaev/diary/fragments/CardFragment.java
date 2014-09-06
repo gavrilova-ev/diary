@@ -21,15 +21,16 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CursorAdapter;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class CardFragment extends ListFragment {
+public class CardFragment extends ListFragment implements View.OnClickListener {
 
 	public static final String MIN_FAVORITE_TYPE = "minFavoriteType";
-	public static final int[] FAVORITE_ICON_IDS = { R.drawable.star_none_2,
-			R.drawable.star_bronze_2, R.drawable.star_silver_3,
-			R.drawable.star_gold_2 };
+	public static final int[] FAVORITE_ICON_IDS = { R.drawable.no_star,
+			R.drawable.bronze_star, R.drawable.silver_star,
+			R.drawable.gold_star };
 	private SQLiteDatabase db;
 	private int minFavoriteType = 0;
 	private View rootView = null;
@@ -40,10 +41,10 @@ public class CardFragment extends ListFragment {
 		Bundle args = new Bundle();
 		args.putInt(MIN_FAVORITE_TYPE, minFavoriteType);
 		newInstance.setArguments(args);
-		
+
 		return newInstance;
 	}
-	
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -55,11 +56,12 @@ public class CardFragment extends ListFragment {
 
 		setListAdapter(new DiaryCursorAdapter(getActivity(), getFreshCursor()));
 	}
-	
+
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
-		this.rootView = inflater.inflate(R.layout.activity_card, container, false);
+		this.rootView = inflater.inflate(R.layout.card_fragment, container,
+				false);
 		return this.rootView;
 	}
 
@@ -72,7 +74,9 @@ public class CardFragment extends ListFragment {
 	private Cursor getFreshCursor() {
 		ensureDatabaseOpen();
 		Cursor cursor = db.query(false, "events", new String[] { "date",
-				"group_concat(description, '#~#~#') AS descriptions",
+				"group_concat(description, '\u1234') AS descriptions",
+				"group_concat(fav_type, '\u1234') AS fav_types",
+				"group_concat(_id, '\u1234') AS ids",
 				"min(_id) AS _id" }, "fav_type >= ?",
 				new String[] { String.valueOf(minFavoriteType) }, "date", null,
 				"date desc", null);
@@ -81,7 +85,8 @@ public class CardFragment extends ListFragment {
 
 	private void ensureDatabaseOpen() {
 		if (db == null || !db.isOpen()) {
-			DiarySQLiteOpenHelper helper = new DiarySQLiteOpenHelper(getActivity());
+			DiarySQLiteOpenHelper helper = new DiarySQLiteOpenHelper(
+					getActivity());
 			db = helper.getWritableDatabase();
 		}
 	}
@@ -131,46 +136,58 @@ public class CardFragment extends ListFragment {
 		}
 	}
 
-//	private boolean removeAll() {
-//		DialogInterface.OnClickListener onClickListener = new DialogInterface.OnClickListener() {
-//
-//			@Override
-//			public void onClick(DialogInterface dialog, int which) {
-//				if (which == DialogInterface.BUTTON_POSITIVE) {
-//					CardFragment.this.removeAllEntries();
-//				}
-//
-//			}
-//		};
-//		new AlertDialog.Builder(this).setMessage("Are you sure?")
-//				.setPositiveButton("Yes", onClickListener)
-//				.setNegativeButton("No", onClickListener).show();
-//		return true;
-//	}
-//
-//
-//	protected void removeAllEntries() {
-//		ensureDatabaseOpen();
-//		db.execSQL("DELETE FROM events");
-//		refreshCursor();
-//		getListView().invalidate();
-//	}
+	// private boolean removeAll() {
+	// DialogInterface.OnClickListener onClickListener = new
+	// DialogInterface.OnClickListener() {
+	//
+	// @Override
+	// public void onClick(DialogInterface dialog, int which) {
+	// if (which == DialogInterface.BUTTON_POSITIVE) {
+	// CardFragment.this.removeAllEntries();
+	// }
+	//
+	// }
+	// };
+	// new AlertDialog.Builder(this).setMessage("Are you sure?")
+	// .setPositiveButton("Yes", onClickListener)
+	// .setNegativeButton("No", onClickListener).show();
+	// return true;
+	// }
+	//
+	//
+	// protected void removeAllEntries() {
+	// ensureDatabaseOpen();
+	// db.execSQL("DELETE FROM events");
+	// refreshCursor();
+	// getListView().invalidate();
+	// }
+
+	@Override
+	public void onClick(View v) {
+		if (v instanceof ImageView) {
+			// It is a star.
+			onClickFavorite(v);
+		}
+	}
 
 	public void onClickFavorite(View view) {
+		long id = (Long) view.getTag(R.id.tag_entry_id);
+		int curFavType = (Integer) view.getTag(R.id.tag_fav_type);
+
+		Toast.makeText(getActivity(), String.format("Star click detected!\nId: %d, current type: %d\nView: %s", id, curFavType, view.toString()),
+				Toast.LENGTH_LONG).show();
 		if (minFavoriteType > 2) {
 			return;
 		}
 
-		int position = getListView().getPositionForView(view);
-		long id = getListAdapter().getItemId(position);
-		int curFavType = (Integer) view.getTag();
 		int newFavType;
 		if (curFavType == minFavoriteType) {
 			newFavType = minFavoriteType + 1;
 		} else if (curFavType == minFavoriteType + 1) {
 			newFavType = minFavoriteType;
 		} else {
-			Toast.makeText(getActivity(), "This favorite type is too great to modify.",
+			Toast.makeText(getActivity(),
+					"This favorite type is too great to modify.",
 					Toast.LENGTH_SHORT).show();
 			return;
 		}
@@ -187,9 +204,13 @@ public class CardFragment extends ListFragment {
 
 	private void setFavImage(ImageView favoriteImage, int favType) {
 		favoriteImage.setImageResource(FAVORITE_ICON_IDS[favType]);
-		favoriteImage.setTag(Integer.valueOf(favType));
+		favoriteImage.setTag(R.id.tag_fav_type, Integer.valueOf(favType));
 	}
 
+	public int getMinFavoriteType() {
+		return minFavoriteType;
+	}
+	
 	private class DiaryCursorAdapter extends CursorAdapter {
 
 		public DiaryCursorAdapter(Context context, Cursor c) {
@@ -199,7 +220,7 @@ public class CardFragment extends ListFragment {
 		@Override
 		public View newView(Context context, Cursor cursor, ViewGroup parent) {
 			LayoutInflater inflater = LayoutInflater.from(context);
-			View view = inflater.inflate(R.layout.activity_card_card, null);
+			View view = inflater.inflate(R.layout.card_fragment_card, null);
 			bindView(view, context, cursor);
 			return view;
 		}
@@ -221,25 +242,56 @@ public class CardFragment extends ListFragment {
 			String[] daysOfWeek = getResources().getStringArray(
 					R.array.days_of_week);
 
-			TextView dateText = (TextView) view.findViewById(R.id.date_text);
-			dateText.setText(String.format("%s, %04d-%02d-%02d",
+			TextView titleText = (TextView) view
+					.findViewById(R.id.card_fragment_card_title);
+			titleText.setText(String.format("%s, %04d-%02d-%02d",
 					daysOfWeek[dayOfWeek - 1], year, month + 1, day));
-			
-			TextView descriptionsText = (TextView) view
-					.findViewById(R.id.content_text);
-			String descriptionsAggregate = cursor.getString(1);
-			String[] descriptions = descriptionsAggregate.split("#~#~#");
-			String multiLineDescription = "";
-			for (String description : descriptions) {
-				multiLineDescription += "- "+description+"\n";
-			}
-			multiLineDescription = multiLineDescription.substring(0, multiLineDescription.length() - 1);
-			descriptionsText.setText(multiLineDescription);
 
-			// ImageView favoriteImage = (ImageView) view
-			// .findViewById(R.id.favorite_image);
-			// int favType = cursor.getInt(2);
-			// setFavImage(favoriteImage, favType);
+			LinearLayout entriesLayout = (LinearLayout) view
+					.findViewById(R.id.card_fragment_card_entries);
+			int childCount = entriesLayout.getChildCount();
+
+			String descriptionsAggregate = cursor.getString(1);
+			String[] descriptions = descriptionsAggregate.split("\u1234");
+			String[] favTypes = cursor.getString(2).split("\u1234");
+			String[] ids = cursor.getString(3).split("\u1234");
+
+			for (int i = 0; i < descriptions.length; i++) {
+				String description = descriptions[i];
+				int favType = Integer.parseInt(favTypes[i]);
+
+				View entryView;
+				ImageView favoriteImageView = null;
+				if (i < childCount) {
+					entryView = entriesLayout.getChildAt(i);
+				} else {
+					LayoutInflater inflater = LayoutInflater
+							.from(getActivity());
+					entryView = inflater.inflate(
+							R.layout.card_fragment_card_entry, entriesLayout,
+							false);
+					favoriteImageView = (ImageView) entryView
+							.findViewById(R.id.card_fragment_card_entry_fav_image);
+					favoriteImageView.setOnClickListener(CardFragment.this);
+					entriesLayout.addView(entryView);
+				}
+				if (favoriteImageView == null) {
+					favoriteImageView = (ImageView) entryView
+							.findViewById(R.id.card_fragment_card_entry_fav_image);
+				}
+				setFavImage(favoriteImageView, favType);
+				favoriteImageView.setTag(R.id.tag_entry_id,
+						Long.valueOf(ids[i]));
+
+				TextView descriptionText = (TextView) entryView
+						.findViewById(R.id.card_fragment_card_entry_description_text);
+				descriptionText.setText(description);
+
+			}
+
+			for (int i = descriptions.length; i < childCount; i++) {
+				entriesLayout.removeViewAt(descriptions.length);
+			}
 		}
 
 	}

@@ -6,4 +6,9 @@
         android:title="@string/action_backup"
         auto:showAsAction="never"/>
 
+    <item
+        android:id="@+id/action_restore"
+        android:title="@string/action_restore"
+        auto:showAsAction="never"/>
+
 </menu>

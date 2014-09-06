@@ -1,26 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="5dp"
+    android:layout_marginLeft="5dp"
+    android:layout_marginRight="5dp"
+    android:layout_marginTop="5dp"
     android:orientation="horizontal" >
-
-    <ImageView
-        android:id="@+id/card_fragment_card_entry_fav_image"
-        android:layout_width="32dp"
-        android:layout_height="40dp"
-        android:layout_alignParentRight="true"
-        android:contentDescription="@string/favorite_icon"
-        android:onClick="@string/action_click_favorite"
-        android:src="@drawable/star_none" />
 
     <TextView
         android:id="@+id/card_fragment_card_entry_description_text"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
+        android:layout_weight="1"
         android:layout_height="wrap_content"
         android:text="Something awesome happened"
-        android:paddingLeft="2sp"
-        android:paddingRight="2sp"
-        android:textAppearance="@android:style/TextAppearance.Medium"/>
+        android:layout_gravity="left|center"
+        android:background="#0F00"
+        android:textAppearance="@android:style/TextAppearance.Small"/>
+
+    <ImageView
+        android:id="@+id/card_fragment_card_entry_fav_image"
+        android:layout_width="28dp"
+        android:layout_height="28dp"
+        android:layout_gravity="right|center"
+        android:scaleType="centerInside"
+        android:clickable="true"
+        android:contentDescription="@string/favorite_icon"
+        android:background="#0F00"
+        android:src="@drawable/star_none" />
 
 </LinearLayout>

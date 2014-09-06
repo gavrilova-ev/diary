@@ -34,6 +34,7 @@
             android:name="org.github.gavrilovaev.diary.CardActivity"
             android:label="@string/title_activity_card" >
         </activity>
+        <service android:name="org.github.gavrilovaev.diary.services.NotificationService"></service>
     </application>
 
 </manifest>

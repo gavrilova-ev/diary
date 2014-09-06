@@ -11,14 +11,14 @@
         android:layout_height="match_parent"
         android:layout_weight="1"
         android:gravity="left|center"
-        android:text=""
+        android:text="Some awesome event"
         android:textSize="20sp" />
 
     <ImageView
         android:id="@+id/favorite_image"
-        android:layout_width="48sp"
-        android:layout_height="48sp"
-        android:layout_gravity="center"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:layout_gravity="right|center"
         android:contentDescription="@string/favorite_icon"
         android:onClick="@string/action_click_favorite"
         android:src="@drawable/star_none" />

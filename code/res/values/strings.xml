@@ -31,6 +31,7 @@
     <string name="action_all_times_view">All times view</string>
     <string name="action_done">Done</string>
     <string name="action_backup">Backup data to SD</string>
+    <string name="action_restore">Restore data from SD</string>
     <string name="title_activity_card">Cards</string>
 
 </resources>

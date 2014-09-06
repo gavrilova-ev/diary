@@ -1,17 +1,9 @@
 package org.github.gavrilovaev.diary;
 
-import java.util.Arrays;
-import java.util.Calendar;
-
 import org.github.gavrilovaev.diary.db.BackupUtil;
 import org.github.gavrilovaev.diary.db.DiarySQLiteOpenHelper;
 import org.github.gavrilovaev.diary.fragments.CardFragment;
-import org.github.gavrilovaev.diary.util.ActionBarListActivity;
 
-import android.app.AlertDialog;
-import android.content.ContentValues;
-import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.database.Cursor;
@@ -23,22 +15,16 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBar.OnNavigationListener;
-import android.view.LayoutInflater;
+import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.CursorAdapter;
-import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.SpinnerAdapter;
-import android.widget.TextView;
 import android.widget.Toast;
 
-public class CardActivity extends ActionBarListActivity {
+public class CardActivity extends ActionBarActivity {
 
 	public static final String MIN_FAVORITE_TYPE = "minFavoriteType";
 	public static final int[] FAVORITE_ICON_IDS = { R.drawable.star_none_2,
@@ -57,21 +43,20 @@ public class CardActivity extends ActionBarListActivity {
 			minFavoriteType = extras.getInt(MIN_FAVORITE_TYPE);
 		}
 
-		setContentView(R.layout.activity_main);
+		setContentView(R.layout.card_activity);
 		initializeNavigationDrawer();
-		setListAdapter(new DiaryCursorAdapter(this, getFreshCursor()));
 
 		// Initialize drop-down navigation
-		OnNavigationListener navigationListener = new NavigationSpinnerListener();
-		ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<String>(this,
-				R.layout.card_activity_dropdown_item, 
-				R.id.card_activity_dropdown_item_text,
-				Arrays.asList("Days", "Weeks", "Months", "Years"));
+//		OnNavigationListener navigationListener = new NavigationSpinnerListener();
+//		ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<String>(this,
+//				R.layout.card_activity_dropdown_item, 
+//				R.id.card_activity_dropdown_item_text,
+//				Arrays.asList("Days", "Weeks", "Months", "Years"));
 //		spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-		ActionBar actionBar = getSupportActionBar();
-		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
-		actionBar
-				.setListNavigationCallbacks(spinnerAdapter, navigationListener);
+//		ActionBar actionBar = getSupportActionBar();
+//		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
+//		actionBar
+//				.setListNavigationCallbacks(spinnerAdapter, navigationListener);
 	}
 
 	private void initializeNavigationDrawer() {
@@ -148,19 +133,7 @@ public class CardActivity extends ActionBarListActivity {
 		return super.onCreateOptionsMenu(menu);
 	}
 
-	@Override
-	protected void onRestart() {
-		super.onRestart();
-		refreshCursor();
-		getListView().invalidate();
-	}
 
-	private void refreshCursor() {
-		DiaryCursorAdapter adapter = (DiaryCursorAdapter) getListAdapter();
-		Cursor oldCursor = adapter.getCursor();
-		adapter.changeCursor(getFreshCursor());
-		oldCursor.close();
-	}
 
 	@Override
 	protected void onStop() {
@@ -182,8 +155,10 @@ public class CardActivity extends ActionBarListActivity {
 		case R.id.action_backup:
 			BackupUtil.backupDataToSD(this);
 			return true;
-		case R.id.action_remove_all:
-			return removeAll();
+		case R.id.action_restore:
+			Toast.makeText(this, "Restore dem backup.", Toast.LENGTH_SHORT).show();
+			BackupUtil.loadBackup(this);
+			return true;
 		case R.id.action_week_view:
 			changeMinFavoriteType(0);
 			return true;
@@ -201,22 +176,6 @@ public class CardActivity extends ActionBarListActivity {
 
 	}
 
-	private boolean removeAll() {
-		DialogInterface.OnClickListener onClickListener = new DialogInterface.OnClickListener() {
-
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				if (which == DialogInterface.BUTTON_POSITIVE) {
-					CardActivity.this.removeAllEntries();
-				}
-
-			}
-		};
-		new AlertDialog.Builder(this).setMessage("Are you sure?")
-				.setPositiveButton("Yes", onClickListener)
-				.setNegativeButton("No", onClickListener).show();
-		return true;
-	}
 
 	private void changeMinFavoriteType(int newMinFavoriteType) {
 		FragmentManager fragmentManager = getSupportFragmentManager();
@@ -224,108 +183,23 @@ public class CardActivity extends ActionBarListActivity {
 		Fragment newCardFragment = CardFragment.newInstance(newMinFavoriteType);
 //		transaction.detach(fragmentManager.findFragmentById(R.id.content_fragment));
 //		transaction.attach(newEntryListFragment);
+		int oldMinFavoriteType = 0;
+		Fragment oldFragment = fragmentManager.findFragmentById(R.id.content_fragment);
+		if (oldFragment != null && oldFragment instanceof CardFragment) {
+			CardFragment oldCardFragment = (CardFragment) oldFragment;
+			oldMinFavoriteType = oldCardFragment.getMinFavoriteType();
+		}
+		if (oldMinFavoriteType < newMinFavoriteType) {
+			transaction.setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_left);
+		} else if (oldMinFavoriteType > newMinFavoriteType) {
+			transaction.setCustomAnimations(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
+		}
 		transaction.replace(R.id.content_fragment, newCardFragment);
-		transaction.setTransitionStyle(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
 //		transaction.addToBackStack(null);
 //		transaction.detach(fragmentManager.findFragmentById(R.id.content_fragment));
 		transaction.commit();
 	}
 
-	protected void removeAllEntries() {
-		ensureDatabaseOpen();
-		db.execSQL("DELETE FROM events");
-		refreshCursor();
-		getListView().invalidate();
-	}
-
-	public void onClickFavorite(View view) {
-		if (minFavoriteType > 2) {
-			return;
-		}
-
-		int position = getListView().getPositionForView(view);
-		long id = getListAdapter().getItemId(position);
-		int curFavType = (Integer) view.getTag();
-		int newFavType;
-		if (curFavType == minFavoriteType) {
-			newFavType = minFavoriteType + 1;
-		} else if (curFavType == minFavoriteType + 1) {
-			newFavType = minFavoriteType;
-		} else {
-			Toast.makeText(this, "This favorite type is too great to modify.",
-					Toast.LENGTH_SHORT).show();
-			return;
-		}
-		ensureDatabaseOpen();
-		ContentValues values = new ContentValues(1);
-		values.put("fav_type", newFavType);
-		int affectedRows = db.update("events", values, "_id = " + id, null);
-		if (affectedRows >= 1) {
-			setFavImage((ImageView) view, newFavType);
-			refreshCursor();
-		}
-
-	}
-
-	private void setFavImage(ImageView favoriteImage, int favType) {
-		favoriteImage.setImageResource(FAVORITE_ICON_IDS[favType]);
-		favoriteImage.setTag(Integer.valueOf(favType));
-	}
-
-	private class DiaryCursorAdapter extends CursorAdapter {
-
-		public DiaryCursorAdapter(Context context, Cursor c) {
-			super(context, c, true);
-		}
-
-		@Override
-		public View newView(Context context, Cursor cursor, ViewGroup parent) {
-			LayoutInflater inflater = LayoutInflater.from(context);
-			View view = inflater.inflate(R.layout.activity_card_card, null);
-			bindView(view, context, cursor);
-			return view;
-		}
-
-		@Override
-		public void bindView(View view, Context context, Cursor cursor) {
-			int date = cursor.getInt(0);
-			int day = date % 100;
-			date /= 100;
-			int month = date % 100;
-			date /= 100;
-			int year = date;
-
-			Calendar calendar = Calendar.getInstance();
-			calendar.set(Calendar.DATE, day);
-			calendar.set(Calendar.MONTH, month);
-			calendar.set(Calendar.YEAR, year);
-			int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
-			String[] daysOfWeek = getResources().getStringArray(
-					R.array.days_of_week);
-
-			TextView dateText = (TextView) view.findViewById(R.id.date_text);
-			dateText.setText(String.format("%s, %04d-%02d-%02d",
-					daysOfWeek[dayOfWeek - 1], year, month + 1, day));
-
-			TextView descriptionsText = (TextView) view
-					.findViewById(R.id.content_text);
-			String descriptionsAggregate = cursor.getString(1);
-			String[] descriptions = descriptionsAggregate.split("#~#~#");
-			String multiLineDescription = "";
-			for (String description : descriptions) {
-				multiLineDescription += "- " + description + "\n";
-			}
-			multiLineDescription = multiLineDescription.substring(0,
-					multiLineDescription.length() - 1);
-			descriptionsText.setText(multiLineDescription);
-
-			// ImageView favoriteImage = (ImageView) view
-			// .findViewById(R.id.favorite_image);
-			// int favType = cursor.getInt(2);
-			// setFavImage(favoriteImage, favType);
-		}
-
-	}
 
 	private class DrawerItemClickListener implements
 			ListView.OnItemClickListener {

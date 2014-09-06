@@ -2,7 +2,9 @@ package org.github.gavrilovaev.diary;
 
 import org.github.gavrilovaev.diary.db.BackupUtil;
 import org.github.gavrilovaev.diary.fragments.EntryListFragment;
+import org.github.gavrilovaev.diary.services.NotificationService;
 
+import android.content.ComponentName;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
@@ -12,6 +14,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -63,6 +66,8 @@ public class MainActivity extends ActionBarActivity {
 		// Set the list's click listener
 		drawerList.setOnItemClickListener(new DrawerItemClickListener());
 
+		ComponentName componentName = startService(new Intent(this, NotificationService.class));
+		Log.d("diary", "Tried to start service: " + componentName.toString());
 	}
 
 	@Override
