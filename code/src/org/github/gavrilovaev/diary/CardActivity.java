@@ -221,7 +221,10 @@ public class CardActivity extends ActionBarActivity {
 			} else {
 				changeMinFavoriteType(position);
 			}
-
+			
+			drawerList.setItemChecked(position, true);
+			// setTitle(...);
+			drawerLayout.closeDrawer(drawerList);
 		}
 	}
 	
