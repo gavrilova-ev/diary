@@ -34,6 +34,8 @@ public class CardActivity extends ActionBarActivity {
 	private SQLiteDatabase db;
 	private int minFavoriteType = 0;
 	private ActionBarDrawerToggle drawerToggle;
+	private ListView drawerList;
+	private DrawerLayout drawerLayout;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -63,11 +65,11 @@ public class CardActivity extends ActionBarActivity {
 	}
 
 	private void initializeNavigationDrawer() {
-		String[] navigationLevels = { "Days", "Weeks", "Months", "Years" };
-		ListView drawerList = (ListView) findViewById(R.id.left_drawer);
+		String[] navigationLevels = { "Days", "Weeks", "Months", "Years", "List style" };
+		this.drawerList = (ListView) findViewById(R.id.left_drawer);
 		drawerList.setAdapter(new ArrayAdapter<String>(this,
 				R.layout.drawer_row, R.id.item_text, navigationLevels));
-		DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+		this.drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 		final CharSequence title = getTitle();
 		drawerToggle = new ActionBarDrawerToggle(this, drawerLayout,
 				R.drawable.ic_drawer, 0, 0) {
@@ -209,7 +211,17 @@ public class CardActivity extends ActionBarActivity {
 		@Override
 		public void onItemClick(AdapterView<?> parent, View view, int position,
 				long id) {
-			changeMinFavoriteType(position);
+			// XXX: Temporary hack for backlink to list activity.
+			if (position == 4) {
+				Intent intent = new Intent(CardActivity.this,
+						MainActivity.class);
+				intent.putExtra(CardActivity.MIN_FAVORITE_TYPE, 0);
+				startActivity(intent);
+				finish();
+			} else {
+				changeMinFavoriteType(position);
+			}
+
 		}
 	}
 	
