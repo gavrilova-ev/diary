@@ -13,6 +13,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
@@ -50,6 +51,9 @@ public class EntryListFragment extends ListFragment {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		
+		Log.i("diary", "Creating " + this.getClass().getSimpleName());
+		
 		Bundle arguments = getArguments();
 		if (arguments != null && arguments.containsKey(MIN_FAVORITE_TYPE)) {
 			minFavoriteType = arguments.getInt(MIN_FAVORITE_TYPE);

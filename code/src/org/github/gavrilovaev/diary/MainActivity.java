@@ -32,6 +32,8 @@ public class MainActivity extends ActionBarActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		
+		Log.i("diary", "Creating " + this.getClass().getSimpleName());
 
 		setContentView(R.layout.activity_main);
 

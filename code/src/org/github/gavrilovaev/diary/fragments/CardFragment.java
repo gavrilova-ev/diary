@@ -13,6 +13,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -49,12 +50,15 @@ public class CardFragment extends ListFragment implements View.OnClickListener {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
+		Log.i("diary", "Creating " + this.getClass().getSimpleName());
+		
 		Bundle args = getArguments();
 		if (args != null && args.containsKey(MIN_FAVORITE_TYPE)) {
 			minFavoriteType = args.getInt(MIN_FAVORITE_TYPE);
 		}
 
 		setListAdapter(new DiaryCursorAdapter(getActivity(), getFreshCursor()));
+		setHasOptionsMenu(true);
 	}
 
 	@Override
@@ -99,8 +103,9 @@ public class CardFragment extends ListFragment implements View.OnClickListener {
 
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+		Log.i("diary", "Inflating card fragment.");
 		super.onCreateOptionsMenu(menu, inflater);
-		inflater.inflate(R.menu.entry_list_fragment_actions, menu);
+		inflater.inflate(R.menu.card_fragment_actions, menu);
 	}
 
 	@Override
