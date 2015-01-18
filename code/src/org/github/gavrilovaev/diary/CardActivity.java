@@ -50,6 +50,7 @@ public class CardActivity extends ActionBarActivity {
 
 		setContentView(R.layout.card_activity);
 		initializeNavigationDrawer();
+		changeMinFavoriteType(this.minFavoriteType);
 
 		// Initialize drop-down navigation
 //		OnNavigationListener navigationListener = new NavigationSpinnerListener();
@@ -188,20 +189,39 @@ public class CardActivity extends ActionBarActivity {
 		Fragment newCardFragment = CardFragment.newInstance(newMinFavoriteType);
 //		transaction.detach(fragmentManager.findFragmentById(R.id.content_fragment));
 //		transaction.attach(newEntryListFragment);
+
 		int oldMinFavoriteType = 0;
-		Fragment oldFragment = fragmentManager.findFragmentById(R.id.content_fragment);
-		if (oldFragment != null && oldFragment instanceof CardFragment) {
-			CardFragment oldCardFragment = (CardFragment) oldFragment;
-			oldMinFavoriteType = oldCardFragment.getMinFavoriteType();
+		Fragment oldFragment = fragmentManager.findFragmentById(R.id.card_fragment_container);
+		if (oldFragment != null) {
+			// If there is an old fragment, replace it.
+			Log.i("diary", String.format("Found old fragment: %s", oldFragment));
+
+			// Try to find an appropriate transition.
+			if (oldFragment instanceof CardFragment) {
+				CardFragment oldCardFragment = (CardFragment) oldFragment;
+				oldMinFavoriteType = oldCardFragment.getMinFavoriteType();
+				if (oldMinFavoriteType < newMinFavoriteType) {
+					transaction.setCustomAnimations(R.anim.slide_in_right,
+							R.anim.slide_out_left);
+				} else if (oldMinFavoriteType > newMinFavoriteType) {
+					transaction.setCustomAnimations(
+							android.R.anim.slide_in_left,
+							android.R.anim.slide_out_right);
+				} else {
+					transaction.commit();
+					return;
+				}
+			}
+			
+			transaction.replace(R.id.card_fragment_container, newCardFragment);
+			
+		} else {
+			// If there is no old fragment, simply add the new fragment.
+			Log.i("diary", String.format("No old fragment, adding new one."));
+			
+			transaction.add(R.id.card_fragment_container, newCardFragment);
 		}
-		if (oldMinFavoriteType < newMinFavoriteType) {
-			transaction.setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_left);
-		} else if (oldMinFavoriteType > newMinFavoriteType) {
-			transaction.setCustomAnimations(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
-		}
-		transaction.replace(R.id.content_fragment, newCardFragment);
 //		transaction.addToBackStack(null);
-//		transaction.detach(fragmentManager.findFragmentById(R.id.content_fragment));
 		transaction.commit();
 	}
 

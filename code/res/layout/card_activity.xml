@@ -2,47 +2,35 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" 
-    android:background="#e4e4e4"
-    android:layout_margin="0dp	">
+    android:layout_height="match_parent"
+    android:layout_margin="0dp	"
+    android:background="#e4e4e4" >
 
-    <!-- The main content view -->
+    <!-- This only works for static fragments.
 	<fragment android:name="org.github.gavrilovaev.diary.fragments.CardFragment"
 	    android:id="@+id/content_fragment"
 	    android:layout_width="match_parent"
 	    android:layout_height="match_parent"
 	    />
+    -->
 
-	<!--
-	    <RelativeLayout
+    <!-- The main content view -->
+    <FrameLayout
+        android:id="@+id/card_fragment_container"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="fill"
-        tools:context=".MainActivity" >
+        android:layout_height="match_parent" >
+    </FrameLayout>
 
-        <ListView
-            android:id="@android:id/list"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" >
-        </ListView>
-
-          TextView
-        android:id="@android:id/empty"
-        android:text="@string/empty_list"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        
-    </RelativeLayout> 
-	 -->
 
     <!-- The navigation drawer -->
+
     <ListView
         android:id="@+id/left_drawer"
         android:layout_width="240dp"
         android:layout_height="match_parent"
         android:layout_gravity="start"
+        android:background="#EEEEEE"
         android:choiceMode="singleChoice"
-     	android:background="#EEEEEE"
         android:divider="@android:color/transparent"
         android:dividerHeight="0dp" />
 

@@ -103,7 +103,7 @@ public class CardFragment extends ListFragment implements View.OnClickListener {
 
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-		Log.i("diary", "Inflating card fragment.");
+		Log.i("diary", String.format("Inflating menu for card fragment %s.", this));
 		super.onCreateOptionsMenu(menu, inflater);
 		inflater.inflate(R.menu.card_fragment_actions, menu);
 	}
@@ -124,8 +124,8 @@ public class CardFragment extends ListFragment implements View.OnClickListener {
 
 	@Override
 	public void onStop() {
-		super.onStop();
 		ensureDatabaseClosed();
+		super.onStop();
 	}
 
 	@Override
