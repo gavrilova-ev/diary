@@ -179,8 +179,6 @@ public class CardFragment extends ListFragment implements View.OnClickListener {
 		long id = (Long) view.getTag(R.id.tag_entry_id);
 		int curFavType = (Integer) view.getTag(R.id.tag_fav_type);
 
-		Toast.makeText(getActivity(), String.format("Star click detected!\nId: %d, current type: %d\nView: %s", id, curFavType, view.toString()),
-				Toast.LENGTH_LONG).show();
 		if (minFavoriteType > 2) {
 			return;
 		}
