@@ -103,6 +103,10 @@ public class NotificationService extends Service implements Runnable {
 		if (numDaysSinceLatestEntry < 1) {
 			return;
 		}
+		int hourOfDay = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
+		if (numDaysSinceLatestEntry == 1 && hourOfDay < 18) {
+			return;
+		}
 
 		buildNoNewEntriesNotification(numDaysSinceLatestEntry);
 	}
@@ -114,8 +118,12 @@ public class NotificationService extends Service implements Runnable {
 	 *            is the number of days since the latest entry
 	 */
 	private void buildNoNewEntriesNotification(int numDaysSinceLatestEntry) {
-		String notificationText = String.format(Locale.ENGLISH,
-				"%d days since the last entry", numDaysSinceLatestEntry);
+		String notificationText;
+		if (numDaysSinceLatestEntry == 1) {
+			notificationText = "No entries for today";
+		} else {
+			notificationText = String.format(Locale.ENGLISH, "%d days since the last entry", numDaysSinceLatestEntry);
+		}
 		Builder builder = new NotificationCompat.Builder(this);
 		builder.setContentTitle("Diary not up-to-date")
 				.setContentText(notificationText)
