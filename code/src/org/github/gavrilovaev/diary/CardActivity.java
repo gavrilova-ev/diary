@@ -3,7 +3,10 @@ package org.github.gavrilovaev.diary;
 import org.github.gavrilovaev.diary.db.BackupUtil;
 import org.github.gavrilovaev.diary.db.DiarySQLiteOpenHelper;
 import org.github.gavrilovaev.diary.fragments.CardFragment;
+import org.github.gavrilovaev.diary.services.DiaryServiceStarter;
+import org.github.gavrilovaev.diary.services.NotificationService;
 
+import android.content.ComponentName;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.database.Cursor;
@@ -95,6 +98,8 @@ public class CardActivity extends ActionBarActivity {
 
 		// Set the list's click listener
 		drawerList.setOnItemClickListener(new DrawerItemClickListener());
+		
+		DiaryServiceStarter.startNotificationService(this);
 	}
 
 	@Override

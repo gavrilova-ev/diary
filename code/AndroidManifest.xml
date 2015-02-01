@@ -9,12 +9,14 @@
         android:targetSdkVersion="15" />
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/DiaryTheme" >
+        
         <activity
             android:name="org.github.gavrilovaev.diary.MainActivity"
             android:label="@string/app_name" >
@@ -34,7 +36,17 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <service android:name="org.github.gavrilovaev.diary.services.NotificationService"></service>
+
+        <service android:name="org.github.gavrilovaev.diary.services.NotificationService" >
+        </service>
+
+        <receiver
+            android:name="org.github.gavrilovaev.diary.services.DiaryServiceStarter"
+            android:enabled="true" >
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>
