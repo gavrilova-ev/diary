@@ -3,7 +3,7 @@
 
     <item
         android:id="@+id/action_done"
-        android:icon="@drawable/abc_ic_cab_done_holo_dark"
+        android:icon="@android:drawable/ic_input_add"
         android:title="@string/action_done"
         appcompat:showAsAction="ifRoom" />
     
